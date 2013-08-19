@@ -156,7 +156,7 @@ new_mode("lua", [[Execute arbitrary Lua commands within the luakit
     end,
     activate = function (w, text)
         w:set_input("")
-        local ret = assert(loadstring("return function(w) return "..text.." end"))()(w)
+        local ret = assert(loadstring("return function(w) "..text.." end"))()(w)
         if ret then print(ret) end
     end,
     history = {maxlen = 50},
