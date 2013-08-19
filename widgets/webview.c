@@ -459,6 +459,16 @@ luaH_webview_ssl_trusted(lua_State *L)
     return 0;
 }
 
+/* ask the WebView if there is anything selected */
+static gboolean
+luaH_webview_has_selection(lua_State *L)
+{
+	webview_data_t *d = luaH_checkwvdata(L, 1);
+	lua_pushboolean(L, webkit_web_view_has_selection(d->view));
+	return 1;
+}
+
+
 static gint
 luaH_webview_index(lua_State *L, widget_t *w, luakit_token_t token)
 {
@@ -486,6 +496,7 @@ luaH_webview_index(lua_State *L, widget_t *w, luakit_token_t token)
       PF_CASE(RELOAD_BYPASS_CACHE,  luaH_webview_reload_bypass_cache)
       PF_CASE(SSL_TRUSTED,          luaH_webview_ssl_trusted)
       PF_CASE(STOP,                 luaH_webview_stop)
+      PF_CASE(HAS_SELECTION,        luaH_webview_has_selection)
       /* push inspector webview methods */
       PF_CASE(SHOW_INSPECTOR,       luaH_webview_show_inspector)
       PF_CASE(CLOSE_INSPECTOR,      luaH_webview_close_inspector)
@@ -740,7 +751,7 @@ populate_popup_from_table(lua_State *L, GtkMenu *menu, widget_t *w)
                 ref = luaH_object_ref(L, -1);
                 last_popup.refs = g_slist_prepend(last_popup.refs, ref);
                 g_object_set_data(G_OBJECT(item), "lua_callback", ref);
-                gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+                gtk_menu_shell_prepend(GTK_MENU_SHELL(menu), item);
                 gtk_widget_show(item);
                 g_signal_connect(item, "activate", G_CALLBACK(menu_item_cb), (gpointer)w);
             }

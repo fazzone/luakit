@@ -2,11 +2,25 @@
 -- WebKit WebView class --
 --------------------------
 
+z_hovered_link = nil
+
 -- Webview class table
 webview = {}
 
 -- Table of functions which are called on new webview widgets.
 webview.init_funcs = {
+    custom_popup = function (view, w)
+        view:add_signal("populate-popup", function (v)
+			if z_hovered_link then
+				return {{"Open Link In New Tab", function () w:new_tab(z_hovered_link, false) end}}
+			end
+			if view:has_selection() then
+				local sel = luakit.selection.primary
+				if sel then return {{":tabopen "..sel, function () w:new_tab(w:search_open(sel), false) end}} end
+			end
+			return {}
+        end)
+	end,
     -- Set useragent
     set_useragent = function (view, w)
         view.user_agent = globals.useragent
@@ -83,11 +97,13 @@ webview.init_funcs = {
     link_hover_display = function (view, w)
         view:add_signal("link-hover", function (v, link)
             if w.view == v and link then
+			    z_hovered_link = link
                 w:update_uri(link)
             end
         end)
         view:add_signal("link-unhover", function (v)
             if w.view == v then
+			    z_hovered_link = nil
                 w:update_uri()
             end
         end)
