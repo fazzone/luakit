@@ -464,7 +464,8 @@ static gboolean
 luaH_webview_has_selection(lua_State *L)
 {
 	webview_data_t *d = luaH_checkwvdata(L, 1);
-	lua_pushboolean(L, webkit_web_view_has_selection(d->view));
+	//webkit_web_view_has_selection seems to give the wrong answer
+	lua_pushboolean(L, webkit_web_view_can_copy_clipboard(d->view));
 	return 1;
 }
 
