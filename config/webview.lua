@@ -9,14 +9,23 @@ webview = {}
 webview.init_funcs = {
     custom_popup = function (view, w)
         view:add_signal("populate-popup", function (v)
+			menu = {}
+			--Selecting something takes more work than hovering over it, so if we have a selection that is also
+			--part of a link, the selection action should be first (because if we wanted to do the link action
+			--we wouldn't have selected anything)
+			--Note that menu items are *prepended* to the context-menu
 			if view.hovered_uri then
-				return {{"Open Link In New Tab", function () w:new_tab(view.hovered_uri, false) end}}
+				table.insert(menu, {"Open Link In New Tab", function () w:new_tab(view.hovered_uri, false) end})
 			end
+
 			if view:has_selection() then
 				local sel = luakit.selection.primary
-				if sel then return {{":tabopen "..sel, function () w:new_tab(w:search_open(sel), false) end}} end
+				if sel then
+					table.insert(menu, {":tabopen "..sel, function () w:new_tab(w:search_open(sel), false) end})
+				end
 			end
-			return {}
+
+			return menu
         end)
 	end,
     -- Set useragent
